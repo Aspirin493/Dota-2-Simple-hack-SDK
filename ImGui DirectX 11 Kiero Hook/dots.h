@@ -95,7 +95,7 @@ CBaseEntity* localent = nullptr;
 u64 Schema;
 u64 m_iHealth, m_iMaxHealth, m_flMana, m_flMaxMana, m_iCurrentLevel, m_hAbilities, m_lifeState, m_hReplicatingOtherHeroModel, m_iTeamNum, m_hOwnerEntity, m_clrRender,
 m_iGlowType, m_glowColorOverride, a_m_iLevel, a_m_iManaCost, a_m_flCooldownLength, a_m_fCooldown, a_m_bHidden, m_Glow, m_iHealthBarOffset,
-m_pGameSceneNode, m_vecAbsOrigin, m_fGameTime, m_nGameState, m_iTaggedAsVisibleByTeam;
+m_pGameSceneNode, m_vecAbsOrigin, m_fGameTime, m_nGameState, m_iTaggedAsVisibleByTeam, m_bDormant;
 
 
 
@@ -556,6 +556,12 @@ public:
         ui gamescenenode = *(ui*)((ui)this + m_pGameSceneNode);
         return *(Vector*)(gamescenenode + m_vecAbsOrigin);
     }
+
+    bool IsDormant() 
+    {
+        return *(bool*)((ui)this + m_bDormant);
+    }
+    
 
     bool WorldToScreen(Vector& abs, FVector& screen, int& x, int& y)
     {
@@ -1098,7 +1104,7 @@ void IterateEntities()
                             data.y = y - ent->GetHealthBarOffset() / 100 * 10;
                             data.onScreen = onScreen;
                             data.isAlive = ent->IsAlive();
-                            data.timestamp = (int)tnow;
+                            data.inVision = ent->IsDormant();
 
 
                             Enemies[eindex] = data;
@@ -1573,6 +1579,8 @@ void GetModules()
     m_clrRender = BaseEntity->GetOffset("m_clrRender");
     m_clrRender = BaseNPC->GetOffset("m_clrRender");
     m_lifeState = BaseEntity->GetOffset("m_lifeState");
+    m_bDormant = BaseEntity->GetOffset("m_bDormant");
+    
 
     m_clrRender = BaseModel->GetOffset("m_clrRender");
     m_hReplicatingOtherHeroModel = BaseNPC_Hero->GetOffset("m_hReplicatingOtherHeroModel");

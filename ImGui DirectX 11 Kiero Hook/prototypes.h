@@ -36,8 +36,8 @@ struct DrawManaData
 
 struct Enemy {
 	float mana, maxMana;
-	int x, y, timestamp;
-	bool onScreen, isAlive;
+	int x, y;
+	bool onScreen, isAlive, inVision;
 };
 
 struct Vector4

@@ -32,6 +32,9 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
+bool manabar = false;
+ImColor manaColor = { 0, 0, 0, 0, };
+
 void drawManaBar(float x, float y, float value, float value2) {
 	ImGui::PushFont(manaFont);
 	auto draw = ImGui::GetBackgroundDrawList();
@@ -41,12 +44,14 @@ void drawManaBar(float x, float y, float value, float value2) {
 	float wf = perc * 1.2;
 
 	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + 120, y + 20), ImColor(17, 17, 17, 255), 3.0f, ImDrawCornerFlags_All);
-	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + wf, y + 20), ImColor(27, 54, 150, 255), 3.0f, ImDrawCornerFlags_All);
+	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + wf, y + 20), manaColor, 3.0f, ImDrawCornerFlags_All); //ImColor(27, 54, 150, 255)
 	auto textWidth = ImGui::CalcTextSize(text.data()).x;
 	int textPosX = x + (120 / 2 - (int)textWidth / 2);
 	draw->AddText(ImVec2(textPosX, y + 1), ImColor(255, 255, 255, 255), text.data());
 	ImGui::PopFont();
 }
+
+
 
 bool init = false;
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
@@ -76,7 +81,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	if (InGame) {
+	if (InGame && manabar) {
 		for (int i = 0; i < 5; i++)
 		{	
 			Enemy hero = Enemies[i];
@@ -88,6 +93,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			}
 		}
 	}
+
+	ImGui::Begin("hack");
+	ImGui::Checkbox("manabar", &manabar);
+	ImGui::ColorEdit4("mana color", (float*)&manaColor);
+	ImGui::End();
 
 	ImGui::Render();
 
