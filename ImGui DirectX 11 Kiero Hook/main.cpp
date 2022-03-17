@@ -10,11 +10,16 @@ ID3D11Device* pDevice = NULL;
 ID3D11DeviceContext* pContext = NULL;
 ID3D11RenderTargetView* mainRenderTargetView;
 
+ImFont* manaFont;
+
 void InitImGui()
 {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.Framerate = 60.f;
 	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+	manaFont = io.Fonts->AddFontFromFileTTF("C:/Users/yi6de/Documents/ImGui-DirectX-11-Kiero-Hook-master/Montserrat-Medium.ttf", 18.f);
 	ImGui_ImplWin32_Init(window);
 	ImGui_ImplDX11_Init(pDevice, pContext);
 }
@@ -25,6 +30,22 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		return true;
 
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
+
+void drawManaBar(float x, float y, float value, float value2) {
+	ImGui::PushFont(manaFont);
+	auto draw = ImGui::GetBackgroundDrawList();
+	std::string text = std::to_string((int)value) + " / " + std::to_string((int)value2);
+
+	float perc = value / (value2 / 100);
+	float wf = perc * 1.2;
+
+	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + 120, y + 20), ImColor(17, 17, 17, 255), 3.0f, ImDrawCornerFlags_All);
+	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + wf, y + 20), ImColor(27, 54, 150, 255), 3.0f, ImDrawCornerFlags_All);
+	auto textWidth = ImGui::CalcTextSize(text.data()).x;
+	int textPosX = x + (120 / 2 - (int)textWidth / 2);
+	draw->AddText(ImVec2(textPosX, y + 1), ImColor(255, 255, 255, 255), text.data());
+	ImGui::PopFont();
 }
 
 bool init = false;
@@ -55,8 +76,18 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("ImGui Window");
-	ImGui::End();
+	if (InGame) {
+		for (int i = 0; i < 5; i++)
+		{	
+			Enemy hero = Enemies[i];
+
+			std::time_t tnow = std::time(0);
+
+			if (hero.isAlive && hero.onScreen){
+				drawManaBar((float)hero.x, (float)hero.y, hero.mana, hero.maxMana);
+			}
+		}
+	}
 
 	ImGui::Render();
 

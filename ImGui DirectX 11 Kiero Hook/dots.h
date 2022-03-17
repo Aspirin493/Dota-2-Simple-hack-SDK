@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <vector>
 #include <array>
+#include <ctime>
 #include <chrono>
 #include <thread>
 #include <queue>
@@ -60,6 +61,10 @@ CBaseEntity* Heroes[10] = { 0,0,0,0,0,0,0,0,0,0 };
 std::set<CBaseEntity*> Entities; //// Heroes, Illusions , etc.
 std::set<CBaseEntity*> AllEntities; //// All new created entities
 std::set<CDOTA_Ability*> Abilities;
+
+DrawManaData ManaDraw[5];
+
+Enemy Enemies[5];
 
 int state = 0;
 int heroesInArray = 0;
@@ -552,11 +557,11 @@ public:
         return *(Vector*)(gamescenenode + m_vecAbsOrigin);
     }
 
-    bool WorldToScreen(Vector& abs, FVector& screen)
+    bool WorldToScreen(Vector& abs, FVector& screen, int& x, int& y)
     {
         FVector2 result;
-        int x = 0;
-        int y = 0;
+        x = 0;
+        y = 0;
 
         abs = this->GetAbsOrigin();
         int healthbaroffset = this->GetHealthBarOffset();
@@ -945,12 +950,13 @@ void IterateHeroes(CGameEntitySystem* Ptr, CBaseEntity* EntityInstance, int r8)
 
 
 
-
+int drawManaIndex = 0;
+int eindex = 0;
 
 class CBaseEntity;
 void IterateEntities()
-{
-
+{   
+    
     CBaseEntity* entity = nullptr;
     for (int i = 0; i < entsystem->GetHighestEntityIndex(); i++)
     {
@@ -1021,7 +1027,7 @@ void IterateEntities()
                         if (ent->IsSeenByEnemy())
                         {
                             // particle0 = new Particle;
-                            particle0 = pt->Create(particlename.aurashivas, ParticleAttachment_t::PATTACH_INVALID, ent, 0, 0);
+                            particle0 = pt->Create(particlename.aurashivas, ParticleAttachment_t::PATTACH_ABSORIGIN, ent, 0, 0);
                             FVector color = { 255,0,0 };
                             FVector range = { 250,250,0 };
                             FVector idk = { 10,0,0 };
@@ -1074,7 +1080,31 @@ void IterateEntities()
                             ent->SetColor(0, 0, 255, 180);//  ABGR
                         }
                         else //////////////////////// The Entity is ENEMY           NOT ILLUSION
-                        {
+                        {   
+                            Enemy data;
+
+                            int x = 0;
+                            int y = 0;
+
+                            Vector abs = ent->GetAbsOrigin();
+
+                            std::time_t tnow = std::time(0);
+
+                            bool onScreen = W2S(abs, &x, &y, nullptr);
+
+                            data.mana = ent->GetMana();
+                            data.maxMana = ent->GetMaxMana();
+                            data.x = x - 70;
+                            data.y = y - ent->GetHealthBarOffset() / 100 * 10;
+                            data.onScreen = onScreen;
+                            data.isAlive = ent->IsAlive();
+                            data.timestamp = (int)tnow;
+
+
+                            Enemies[eindex] = data;
+                            eindex += 1;
+                            
+
                             if (heroscript && localhero.pEnt)  ///// Scripts
                             {
 
@@ -1220,9 +1250,8 @@ void IterateEntities()
     if (zuus_counter > 0) zuus_counter = 0;
 
 
-
-
-
+    drawManaIndex = 0;
+    eindex = 0;
 }
 
 void hkRunFrame(ui* parameter)
@@ -1286,6 +1315,21 @@ void hkRunFrame(ui* parameter)
             one = false;
             once2 = false;
             localhero.pEnt = nullptr;
+
+            for (int i = 0; i < 5; i++)
+            {   
+                Enemy data;
+
+                data.mana = 0;
+                data.maxMana =0;
+                data.x = 0;
+                data.y = 0;
+                data.onScreen = false;
+                data.isAlive = false;
+
+                Enemies[i] = data;
+            }
+            
             MyParticles.clear();
             AllEntities.clear();
             MyParticles.clear();

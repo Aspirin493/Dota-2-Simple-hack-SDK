@@ -27,6 +27,19 @@ struct Vector3
 {
 	float x, y, w;
 };
+
+struct DrawManaData
+{
+	int x, y, current, max;
+	bool hidden;
+};
+
+struct Enemy {
+	float mana, maxMana;
+	int x, y, timestamp;
+	bool onScreen, isAlive;
+};
+
 struct Vector4
 {
 	float x, y, z, w;
