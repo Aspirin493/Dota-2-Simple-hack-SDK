@@ -26,6 +26,8 @@
 ///////////////////////////////////////////
 
 
+#include "logger.h"
+
 #include <ctime>
 #include <string>
 #include <Psapi.h>
@@ -895,6 +897,7 @@ void exithack()
 {
     CMSG(" .....\n");
     CMSG("Uninjecting.....\n");
+    Logger::FATAL("Uninjecting.....");
     CMSG(" .....\n");
     Sleep(7000);
     //FreeLibraryAndExitThread((HMODULE)GetModuleHandle("hacker.dll"), 0);
@@ -1271,7 +1274,7 @@ void hkRunFrame(ui* parameter)
             if (!InGame)
             {
                 ClientCMDUnrestricted = (_ClientCMDUnrestricted)VT_METHOD(CEngineClient, 36);
-
+                Logger::DEBUG("join in match");
 
                 InGame = true;
 
@@ -1290,8 +1293,6 @@ void hkRunFrame(ui* parameter)
                 // HookVMT(EntSystem, RemoveHeroes, (ui*)hkOnRemoveEntity, 15);
             }
 
-
-
             IterateEntities();
 
 
@@ -1301,8 +1302,9 @@ void hkRunFrame(ui* parameter)
 
     if (!IsInGame() && InGame == true) ////////// Not In Game/ disconnect / quit /exitmatch
     {
-        if (gotent)
-        {
+        if (true) // gotoent not work
+        {   
+            Logger::DEBUG("disconnected from match");
             localhero.pEnt = nullptr;
             localhero.pPlayer = nullptr;
             Ultimate = nullptr;
@@ -1365,6 +1367,7 @@ void GetModules()
     if (!OnColorChangedPtr)
     {
         CMSG("Failed to Get OnColorChanged");
+        Logger::ERR("Failed to Get OnColorChanged");
 
         exithack();
     }
@@ -1375,6 +1378,7 @@ void GetModules()
     if (!HasModifierPtr)
     {
         CLRMSG(&Red, "Failed to get HasModifierPtr\n");
+        Logger::ERR("Failed to get HasModifierPtr");
 
         exithack();
     }
@@ -1385,6 +1389,7 @@ void GetModules()
     if (!GetPanelTypePtr)                     //48 89 5C 24 10 48 89 6C 24 18 48 89 74 24 20 57 48 83 EC 20 80 3D ? ? ? ? ? 48 8B EA 48 8B F1 75 6E B9 98 00 00 00 E8 ? ? ? ? 48 8B D8 48 85 C0
     {
         CMSG("Failed to Get GetPanelTypePTR\n");
+        Logger::ERR("Failed to get GetPanelTypePTR");
         exithack();
     }
     oGetPanelType = (_GetPanelType)GetPanelTypePtr;
@@ -1394,6 +1399,7 @@ void GetModules()
     if (!CreateParticlePtr)
     {
         CLRMSG(&Red, "Failed to get CreateParticlePtr");
+        Logger::ERR("Failed to get CreateParticlePtr");
 
         exithack();
     }
@@ -1403,6 +1409,7 @@ void GetModules()
     if (!RenderSystemPtr)
     {
         CLRMSG(&Red, "Failed to get pRenderSystemptr\n");
+        Logger::ERR("Failed to get pRenderSystemptr");
 
         exithack();
     }
@@ -1412,6 +1419,7 @@ void GetModules()
     if (!DestroyParticlePtr)
     {
         CLRMSG(&Red, "Failed to get DestroyParticlePtr\n");
+        Logger::ERR("Failed to get DestroyParticlePtr");
 
         exithack();
     }
@@ -1421,6 +1429,7 @@ void GetModules()
     if (!entfindPat)
     {
         CLRMSG(&Red, "Failed to get EntSystem\n");
+        Logger::ERR("Failed to get EntSystem");
 
         exithack();
     }
@@ -1433,6 +1442,7 @@ void GetModules()
     if (!entfindPat)
     {
         CLRMSG(&Red, "Failed to get GetEntIndex\n");
+        Logger::ERR("Failed to get GetEntIndex");
 
         exithack();
     }
@@ -1442,6 +1452,7 @@ void GetModules()
     if (!GetStatePtr)
     {
         CMSG("Failed to get GetStatePtr\n");
+        Logger::ERR("Failed to get GetStatePtr");
 
         exithack();
     }
@@ -1450,6 +1461,7 @@ void GetModules()
     if (!IsEntityInRangePtr)
     {
         CMSG("Failed to get IsEntityInRangePtr\n");
+        Logger::ERR("Failed to get IsEntityInRangePtr");
 
         exithack();
 
@@ -1471,6 +1483,7 @@ void GetModules()
     if (!W2SPtr)
     {
         CMSG("Failed to get W2SPtr\n");
+        Logger::ERR("Failed to get W2SPtr");
 
         exithack();
 
@@ -1483,6 +1496,7 @@ void GetModules()
     if (!OnTVPtr)
     {
         CMSG("Failed to get OnTVPtr\n");
+        Logger::ERR("Failed to get OnTVPtr");
 
         exithack();
 
@@ -1491,6 +1505,7 @@ void GetModules()
     if (!FindAbilityPtr)
     {
         CMSG("Failed to get FindAbilityPtr\n");
+        Logger::ERR("Failed to get FindAbilityPtr");
 
         exithack();
     }
@@ -1499,6 +1514,7 @@ void GetModules()
     if (!PrepareOrdersPtr)
     {
         CMSG("Failed to get PrepareOrdersPtr\n");
+        Logger::ERR("Failed to get PrepareOrdersPtr");
 
         exithack();
     }
@@ -1508,6 +1524,7 @@ void GetModules()
     if (!GetSpecialValueForPtr)
     {
         CMSG("Failed to get GetSpecialValueForPtr\n");
+        Logger::ERR("Failed to get GetSpecialValueForPtr");
 
         exithack();
     }
@@ -1517,6 +1534,7 @@ void GetModules()
     if (!GetCastRangeBonusPtr)
     {
         CMSG("Failed to get GetCastRangeBonusPtr\n");
+        Logger::ERR("Failed to get GetCastRangeBonusPtr");
 
         exithack();
     }
@@ -1546,6 +1564,8 @@ void GetModules()
     //hkOnRemoveEntity = (_hkOnRemoveEntity)VT_METHOD(EntSystem, 15);
     CLRMSG(&Red, "Sucessfully injected\n");
 
+    Logger::INFO("Sucessfully injected");
+
     CMSG("Let's hack this\n");
 
 
@@ -1556,7 +1576,7 @@ void GetModules()
 
 
     HookVMT((ui*)Panorama2, hkRunFrame, (ui*)oRunFrame, 6);
-    CMSG("Hooked VMT\n");
+    Logger::INFO("VMT hooked");
     u64 Scope = FindTypeScope(Schema, "client.dll");
     FindDeclaredClass = (_FindDeclaredClass)VT_METHOD(Scope, 2);
     ClassDescription* BaseNPC = (ClassDescription*)FindDeclaredClass(Scope, "C_DOTA_BaseNPC");

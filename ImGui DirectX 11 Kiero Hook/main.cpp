@@ -1,5 +1,8 @@
+#define _WINSOCKAPI_
+
 #include "includes.h"
 #include "dots.h"
+
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -126,7 +129,9 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
-		//test discord webhook
+			
+		Logger::INFO("Injecting....");
+
 		CreateThread(nullptr, 0, MainThread, hMod, 0, nullptr);
 		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)OnInject, hMod, 0, nullptr);
 		break;
