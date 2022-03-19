@@ -1,8 +1,11 @@
-#include "httplib.h"
+///#include "httplib.h"
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
+#include <string>
+#include <iostream>
+
 // HTTP
-static httplib::Client cli("http://localhost:4334");
+///static httplib::Client cli("http://localhost:4334");
 
 
 namespace Logger
@@ -10,21 +13,21 @@ namespace Logger
 	static void DEBUG(std::string d_message) {
 		std::string url = "/?event=DEBUG&message=" + d_message;
 
-		auto res = cli.Get(url.data());
+		std::cout << d_message << std::endl;
 	}
 	static void INFO(std::string i_message) {
 		std::string url = "/?event=INFO&message=" + i_message;
 
-		auto res =  cli.Get(url.data());
+		std::cout << i_message << std::endl;
 	}
 	static void ERR(std::string e_message) {
 		std::string url = "/?event=ERROR&message=" + e_message;
 
-		auto res = cli.Get(url.data());
+		std::cout << e_message << std::endl;;
 	}
 	static void FATAL(std::string f_message) {
 		std::string url = "/?event=FATAL&message=" + f_message;
 
-		auto res = cli.Get(url.data());
+		std::cout << f_message << std::endl;
 	}
 }
