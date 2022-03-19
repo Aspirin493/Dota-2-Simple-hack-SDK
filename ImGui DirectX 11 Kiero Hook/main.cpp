@@ -89,11 +89,12 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		{	
 			Enemy hero = Enemies[i];
 
-			std::time_t tnow = std::time(0);
-
-			if (hero.isAlive && hero.onScreen){
+			///std::time_t tnow = std::time(0);
+			
+			if (hero.onScreen && hero.isAlive) {
 				drawManaBar((float)hero.x, (float)hero.y, hero.mana, hero.maxMana);
 			}
+			
 		}
 	}
 
@@ -129,11 +130,16 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
+
+		AllocConsole();
+		freopen("CONOUT$", "w", stdout);
 			
 		Logger::INFO("Injecting....");
 
 		CreateThread(nullptr, 0, MainThread, hMod, 0, nullptr);
 		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)OnInject, hMod, 0, nullptr);
+
+		
 		break;
 	case DLL_PROCESS_DETACH:
 		kiero::shutdown();

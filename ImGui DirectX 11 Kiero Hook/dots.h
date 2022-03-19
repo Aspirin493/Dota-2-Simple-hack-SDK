@@ -972,10 +972,37 @@ void IterateEntities()
 
         CBaseEntity* ent = entsystem->GetBaseEntity(i);
         if (ent && ent->instance)
-        {
-            if (ent->IsHero())
-            {
+        {   
+            if (ent->IsAbility()) {
 
+            }
+            else if (ent->IsHero())
+            {
+                if (ent->IsEnemy() && !ent->IsIllusion()) {
+                    Enemy data;
+
+                    int x = 0;
+                    int y = 0;
+
+                    Vector abs = ent->GetAbsOrigin();
+
+                    std::time_t tnow = std::time(0);
+
+                    bool onScreen = W2S(abs, &x, &y, nullptr);
+
+                    data.mana = ent->GetMana();
+                    data.maxMana = ent->GetMaxMana();
+                    data.x = x - 70;
+                    data.y = y - ent->GetHealthBarOffset() / 100 * 10;
+                    data.onScreen = onScreen;
+                    data.isAlive = ent->IsAlive();
+                    data.inVision = ent->IsDormant();
+                    data.timestamp = tnow;
+
+
+                    Enemies[eindex] = data;
+                    eindex += 1;
+                }
                 if (ent->IsAlive()) //////////////// ALIVE ENTITY
                 {
                     if (!once2)
@@ -1090,28 +1117,6 @@ void IterateEntities()
                         }
                         else //////////////////////// The Entity is ENEMY           NOT ILLUSION
                         {   
-                            Enemy data;
-
-                            int x = 0;
-                            int y = 0;
-
-                            Vector abs = ent->GetAbsOrigin();
-
-                            std::time_t tnow = std::time(0);
-
-                            bool onScreen = W2S(abs, &x, &y, nullptr);
-
-                            data.mana = ent->GetMana();
-                            data.maxMana = ent->GetMaxMana();
-                            data.x = x - 70;
-                            data.y = y - ent->GetHealthBarOffset() / 100 * 10;
-                            data.onScreen = onScreen;
-                            data.isAlive = ent->IsAlive();
-                            data.inVision = ent->IsDormant();
-
-
-                            Enemies[eindex] = data;
-                            eindex += 1;
                             
 
                             if (heroscript && localhero.pEnt)  ///// Scripts
@@ -1264,10 +1269,13 @@ void IterateEntities()
 }
 
 void hkRunFrame(ui* parameter)
-{
-    if (IsInGame()) /////////// if we are ingame and playing
+{   
+    state = GetGameState();
+
+    if (state != 0) /////////// if we are ingame and playing
     {
-        state = GetGameState();
+        
+        //Logger::DEBUG(std::to_string(state));
         if (state == DOTA_GAMERULES_PREGAME || state == DOTA_GAMERULES_GAME_IN_PROGRESS)
 
         {/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1295,53 +1303,53 @@ void hkRunFrame(ui* parameter)
 
             IterateEntities();
 
+            //Logger::DEBUG("iter");
+
 
         }
     }//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    if (!IsInGame() && InGame == true) ////////// Not In Game/ disconnect / quit /exitmatch
+    if (state == 0 && InGame == true) ////////// Not In Game/ disconnect / quit /exitmatch
     {
-        if (true) // gotoent not work
-        {   
-            Logger::DEBUG("disconnected from match");
-            localhero.pEnt = nullptr;
-            localhero.pPlayer = nullptr;
-            Ultimate = nullptr;
-            CMSG("Exiting match\n");
-            InGame = false;
-            zuus_counter = 0;
-            zeus = 0;
-            axe = 0;
-            pudge = 0;
-            heroscript = false;
-            gotent = 0;
-            state = 0;
-            Entities.clear();
-            LocalPlayerIndex = 0;
-            LocalPlayerTeam = 0;
-            one = false;
-            once2 = false;
-            localhero.pEnt = nullptr;
+        Logger::DEBUG("disconnected from match");
+        localhero.pEnt = nullptr;
+        localhero.pPlayer = nullptr;
+        Ultimate = nullptr;
+        CMSG("Exiting match\n");
+        InGame = false;
+        zuus_counter = 0;
+        zeus = 0;
+        axe = 0;
+        pudge = 0;
+        heroscript = false;
+        gotent = 0;
+        state = 0;
+        Entities.clear();
+        LocalPlayerIndex = 0;
+        LocalPlayerTeam = 0;
+        one = false;
+        once2 = false;
+        localhero.pEnt = nullptr;
 
-            for (int i = 0; i < 5; i++)
-            {   
-                Enemy data;
+        for (int i = 0; i < 5; i++)
+        {
+            Enemy data;
 
-                data.mana = 0;
-                data.maxMana =0;
-                data.x = 0;
-                data.y = 0;
-                data.onScreen = false;
-                data.isAlive = false;
+            data.mana = 0;
+            data.maxMana = 0;
+            data.x = 0;
+            data.y = 0;
+            data.onScreen = false;
+            data.isAlive = false;
 
-                Enemies[i] = data;
-            }
-            
-            MyParticles.clear();
-            AllEntities.clear();
-            MyParticles.clear();
+            Enemies[i] = data;
         }
+            
+        MyParticles.clear();
+        AllEntities.clear();
+        MyParticles.clear();
+
     }
 
 

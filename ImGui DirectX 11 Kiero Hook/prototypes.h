@@ -37,6 +37,7 @@ struct DrawManaData
 struct Enemy {
 	float mana, maxMana;
 	int x, y;
+	std::time_t timestamp;
 	bool onScreen, isAlive, inVision;
 };
 
