@@ -35,8 +35,8 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-bool manabar = false;
-ImColor manaColor = { 0, 0, 0, 0, };
+bool manabar = true;
+ImColor manaColor = { 95, 41, 184, 255, };
 
 void drawManaBar(float x, float y, float value, float value2) {
 	ImGui::PushFont(manaFont);
@@ -52,6 +52,14 @@ void drawManaBar(float x, float y, float value, float value2) {
 	int textPosX = x + (120 / 2 - (int)textWidth / 2);
 	draw->AddText(ImVec2(textPosX, y + 1), ImColor(255, 255, 255, 255), text.data());
 	ImGui::PopFont();
+}
+
+void drawSunStrikeAlert(float x, float y) {
+	auto draw = ImGui::GetBackgroundDrawList();
+
+	draw->AddRectFilled(ImVec2(x, y), ImVec2(x + 120, y + 20), ImColor(235, 64, 52, 255), 3.0f, ImDrawCornerFlags_All);
+
+
 }
 
 
@@ -84,15 +92,31 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	if (InGame && manabar) {
-		for (int i = 0; i < 5; i++)
-		{	
-			Enemy hero = Enemies[i];
+	if (InGame) {
+		if (manabar) {
+			for (int i = 0; i < 5; i++)
+			{
+				Enemy hero = Enemies[i];
 
-			///std::time_t tnow = std::time(0);
-			
-			if (hero.onScreen && hero.isAlive) {
-				drawManaBar((float)hero.x, (float)hero.y, hero.mana, hero.maxMana);
+
+				///std::time_t tnow = std::time(0);
+
+				if (hero.onScreen && hero.isAlive) {
+					drawManaBar((float)hero.x, (float)hero.y, hero.mana, hero.maxMana);
+				}
+
+			}
+		}
+		
+		for (int i = 0; i < 100; i++)
+		{	
+			AbilityWarning ability = ActiveAbilities[i];
+
+			if (ability.onScreen) {
+				if (ability.ability == "sun_strike") {
+					drawSunStrikeAlert((float)ability.x, (float)ability.y);
+					Logger::DEBUG("sun strike draw!");
+				}
 			}
 			
 		}

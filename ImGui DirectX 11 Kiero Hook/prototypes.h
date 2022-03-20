@@ -34,6 +34,13 @@ struct DrawManaData
 	bool hidden;
 };
 
+struct AbilityWarning
+{
+	cc ability;
+	bool onScreen;
+	int x, y;
+};
+
 struct Enemy {
 	float mana, maxMana;
 	int x, y;

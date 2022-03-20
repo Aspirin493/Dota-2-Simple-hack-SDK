@@ -42,6 +42,7 @@
 #include <queue>
 #include <set>
 #include "prototypes.h"
+#include <fstream>
 
 #include <stdint.h>
  ////////////////////////////////////////////////////
@@ -67,6 +68,7 @@ std::set<CDOTA_Ability*> Abilities;
 DrawManaData ManaDraw[5];
 
 Enemy Enemies[5];
+AbilityWarning ActiveAbilities[1];
 
 int state = 0;
 int heroesInArray = 0;
@@ -476,7 +478,7 @@ public:
     }
     bool IsAbility()
     {
-        if (!strcmp("C_DOTABaseAbility", this->GetBaseClass())) // 0 means identical
+        if (!strcmp("C_DOTABaseAbility", this->GetBaseClass()))
         {
             return true;
         }
@@ -504,6 +506,14 @@ public:
     bool IsChargedByBreaker()
     {
         if (HasModifier(this, "modifier_spirit_breaker_charge_of_darkness_vision"))
+        {
+            return true;
+        }
+        return false;
+    }
+    bool IsSunStrike()
+    {
+        if (HasModifier(this, "modifier_invoker_sun_strike"))
         {
             return true;
         }
@@ -561,7 +571,7 @@ public:
 
     bool IsDormant() 
     {
-        return *(bool*)((ui)this + m_bDormant);
+        return *(int*)((ui)this + 0x0030);
     }
     
 
@@ -961,6 +971,7 @@ void IterateHeroes(CGameEntitySystem* Ptr, CBaseEntity* EntityInstance, int r8)
 
 int drawManaIndex = 0;
 int eindex = 0;
+int aindex = 0;
 
 class CBaseEntity;
 void IterateEntities()
@@ -973,10 +984,27 @@ void IterateEntities()
         CBaseEntity* ent = entsystem->GetBaseEntity(i);
         if (ent && ent->instance)
         {   
-            if (ent->IsAbility()) {
+            if (!strcmp("npc_dota_thinker", ent->GetName())) {
+                if (ent->IsSunStrike()) {
+                    AbilityWarning data;
+
+                    Vector abs = ent->GetAbsOrigin();
+
+                    int x = 0;
+                    int y = 0;
+
+                    bool onScreen = W2S(abs, &x, &y, nullptr);
+
+                    data.onScreen = onScreen;
+                    data.x = x;
+                    data.y = y;
+                    data.ability = "sun_strike";
+
+                    ActiveAbilities[aindex] = data;
+                }
 
             }
-            else if (ent->IsHero())
+            if (ent->IsHero())
             {
                 if (ent->IsEnemy() && !ent->IsIllusion()) {
                     Enemy data;
@@ -1063,7 +1091,7 @@ void IterateEntities()
                         if (ent->IsSeenByEnemy())
                         {
                             // particle0 = new Particle;
-                            particle0 = pt->Create(particlename.aurashivas, ParticleAttachment_t::PATTACH_ABSORIGIN, ent, 0, 0);
+                            particle0 = pt->Create(particlename.aurashivas, ParticleAttachment_t::PATTACH_INVALID, ent, 0, 0);
                             FVector color = { 255,0,0 };
                             FVector range = { 250,250,0 };
                             FVector idk = { 10,0,0 };
@@ -1266,6 +1294,7 @@ void IterateEntities()
 
     drawManaIndex = 0;
     eindex = 0;
+    aindex = 0;
 }
 
 void hkRunFrame(ui* parameter)
@@ -1344,6 +1373,19 @@ void hkRunFrame(ui* parameter)
             data.isAlive = false;
 
             Enemies[i] = data;
+        }
+
+        for (int i = 0; i < 100; i++)
+        {
+            AbilityWarning data;
+
+            data.ability = "";
+            data.x = 0;
+            data.y = 0;
+            data.onScreen = false;
+
+            ActiveAbilities[i] = data;
+        
         }
             
         MyParticles.clear();
@@ -1607,7 +1649,8 @@ void GetModules()
     m_clrRender = BaseEntity->GetOffset("m_clrRender");
     m_clrRender = BaseNPC->GetOffset("m_clrRender");
     m_lifeState = BaseEntity->GetOffset("m_lifeState");
-    m_bDormant = BaseEntity->GetOffset("m_bDormant");
+    m_bDormant = BaseModel->GetOffset("m_bDormant");
+    
     
 
     m_clrRender = BaseModel->GetOffset("m_clrRender");
@@ -1616,6 +1659,16 @@ void GetModules()
     m_vecAbsOrigin = CGameSceneNode->GetOffset("m_vecAbsOrigin");
     m_pGameSceneNode = BaseEntity->GetOffset("m_pGameSceneNode");
     m_iHealthBarOffset = BaseNPC->GetOffset("m_iHealthBarOffset");
+
+
+    Logger::DEBUG("Dumping offsets...");
+    //BaseNPC->dump();
+    //BaseNPC_Hero->dump();
+    //BaseEntity->dump();
+    //C_DOTABaseAbilitya->dump();
+    //BaseModel->dump();
+    //CGameSceneNode->dump();
+    Logger::DEBUG("Success!");
 
 
     return;
